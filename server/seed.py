@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # Standard library imports
-from random import random, randint, choice as rc
+from random import random, randint, sample, choice as rc
 
 # Remote library imports
 from faker import Faker
@@ -12,53 +12,80 @@ from models import db, User, StudentCourse, Assignment, Course
 
 fake = Faker()
 
+def seed_users():
+    users = []
+    for _ in range(100):
+        role_probability = random()
 
-def seed_users(num_users):
-    for _ in range(num_users):
+        if role_probability <= 0.25:
+            role = 'teacher'
+        else:
+            role = 'student'
+
         user = User(
             name=fake.name(),
             email=fake.email(),
-            password=fake.password()
+            password=fake.password(),
+            role=role
         )
-        db.session.add(user)
+        users.append(user)
 
-    db.session.commit()
+    return users
 
-def seed_assignments(courses, users):
-    assignments = []
-    for _ in range(20):
-        assignment = Assignment(
-            description=fake.sentence(),
-            student_id=random.choice([user.id for user in users]),
-            course_id=random.choice([course.id for course in courses]),
-            grade=random.choice(range(100))
+
+
+def seed_courses(users):
+    courses = ["Algebra", "Physics", "English", "US History", "Ceramics", "Chemistry", "Art History"]
+    course_list = []
+    teacher_ids = [user for user in users if user.role == 'teacher']
+
+    for course in courses:
+        c = Course(
+            name=course,
+            description=fake.text(),
+            teacher_id=rc(teacher_ids).id
         )
-        assignments.append(assignment)
-    return assignments
+        course_list.append(c)
+    
+    return course_list
 
 def seed_studentcourse(users, courses):
     studentcourses = []
-    for _ in range(10):
-        studentcourse = StudentCourse(
-            student_id=random.choice([user.id for user in users]),
-            course_id=random.choice([course.id for course in courses])
-        )
-        studentcourses.append(studentcourse)
+    student_users = [user for user in users if user.role == 'student']
+    
+    for user in student_users:
+        num_courses = randint(2, 5)
+        user_courses = sample(courses, num_courses)
+
+        for course in user_courses:
+            studentcourse = StudentCourse(
+                student_id=user.id,
+                course_id=course.id
+            )
+        
+            studentcourses.append(studentcourse)
+    
     return studentcourses
 
-def seed_courses(num_courses):
+def seed_assignments(users):
+    assignments = []
+    student_users = [user for user in users if user.role == 'student']
 
-    teacher_ids = db.session.query(User.id).all()
+    for user in student_users:
+        num_assignments = randint(6, 10)
+        user_courses = [course for course in user.course_list]
+        for _ in range(num_assignments):
+            course = rc(user_courses)
+        
+            assignment = Assignment(
+                description=fake.sentence(),
+                student_id=user.id,
+                course_id=course.id,
+                grade=rc(range(60, 100))
+            )
+            assignments.append(assignment)
 
-    for _ in range(num_courses):
-        course = Course(
-            name=fake.name(),
-            description=fake.text(),
-            teacher_id=fake.random_element(teacher_ids)[0]
-        )
-        db.session.add(course)
-
-    db.session.commit()
+    return assignments
 
 if __name__ == '__main__':
 
@@ -70,22 +97,23 @@ if __name__ == '__main__':
         User.query.delete()
 
         print("Seeding users...")
-        seed_users(10)
+        users = seed_users()
+        db.session.add_all(users)
+        db.session.commit()
 
         print("Seeding courses...")
-        seed_courses(5)
-
-        courses = Course.query.all()
-        users = User.query.all()
-
-        print("Seeding assignments...")
-        assignments = seed_assignments(courses, users)
-        db.session.add_all(assignments)
+        courses = seed_courses(users)
+        db.session.add_all(courses)
         db.session.commit()
 
         print("Seeding student courses...")
         studentcourses = seed_studentcourse(users, courses)
         db.session.add_all(studentcourses)
+        db.session.commit()
+
+        print("Seeding assignments...")
+        assignments = seed_assignments(users)
+        db.session.add_all(assignments)
         db.session.commit()
 
         print("Done seeding!")
