@@ -28,33 +28,28 @@ class User(db.Model, SerializerMixin):
     password = db.Column(db.String)
     role = db.Column(db.String)
 
-@validates('email')
-def validate_email(self, key, email):
-    if '@' not in email:
-        raise ValueError("Invalid email address. Email must contain an '@' symbol.")
-    if len(email) > 40:
-            raise ValueError("Invalid email address. Email must be a maximum of 40 characters long.")
-    return email
+    course_list = db.relationship('Course', secondary='enrollments', backref='students')
 
-class StudentCourse(db.Model, SerializerMixin):
-    __tablename__ = "students_courses"
+    serialize_rules = ("-course_list", "-courses.students", "-courses.assignments.students")
 
-    student_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), primary_key=True)
+    @validates('email')
+    def validate_email(self, key, email):
+        if '@' not in email:
+            raise ValueError("Invalid email address. Email must contain an '@' symbol.")
+        if len(email) > 40:
+                raise ValueError("Invalid email address. Email must be a maximum of 40 characters long.")
+        return email
 
 class Assignment(db.Model, SerializerMixin):
     __tablename__ = "assignments"
 
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String)
-    student_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
-    grade = db.Column(db.Integer)
 
+    grades = db.relationship('Grade', backref='assignment')
 
-    student = db.relationship('User', backref='assignments')
-    course = db.relationship('Course', backref='assignments')
-
+    serialize_rules = ("-course.students",)
 
 class Course(db.Model, SerializerMixin):
     __tablename__ = "courses"
@@ -64,8 +59,24 @@ class Course(db.Model, SerializerMixin):
     description = db.Column(db.String)
     teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
-    teacher = db.relationship('User', backref=('courses'))
-    students_courses = db.relationship('StudentCourse', backref='course')
+    teacher = db.relationship('User', backref='courses')
+    assignments = db.relationship('Assignment', backref='course')
+
+class Grade(db.Model, SerializerMixin):
+    __tablename__ = "grades"
+
+    id = db.Column(db.Integer, primary_key=True)
+    assignment_id = db.Column(db.Integer, db.ForeignKey('assignments.id'))
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    value = db.Column(db.Integer)
+
+    student = db.relationship('User', backref='grades')
+
+enrollments = db.Table('enrollments',
+    db.Column('student_id', db.Integer, db.ForeignKey('users.id')),
+    db.Column('course_id', db.Integer, db.ForeignKey('courses.id'))
+)
+    
 
 
 
