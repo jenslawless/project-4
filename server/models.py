@@ -28,7 +28,13 @@ class User(db.Model, SerializerMixin):
     password = db.Column(db.String)
     role = db.Column(db.String)
 
-    students_courses = db.relationship('StudentCourse', backref='user')
+@validates('email')
+def validate_email(self, key, email):
+    if '@' not in email:
+        raise ValueError("Invalid email address. Email must contain an '@' symbol.")
+    if len(email) > 40:
+            raise ValueError("Invalid email address. Email must be a maximum of 40 characters long.")
+    return email
 
 class StudentCourse(db.Model, SerializerMixin):
     __tablename__ = "students_courses"
