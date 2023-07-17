@@ -33,8 +33,8 @@ class User(db.Model, SerializerMixin):
 class StudentCourse(db.Model, SerializerMixin):
     __tablename__ = "students_courses"
 
-    student_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), primary_key=True)
 
 
 
@@ -49,6 +49,9 @@ class Assignment(db.Model, SerializerMixin):
     grade = db.Column(db.Integer)
 
 
+    student = db.relationship('User', backref='assignments')
+    course = db.relationship('Course', backref='assignments')
+
 
 class Course(db.Model, SerializerMixin):
     __tablename__ = "courses"
@@ -57,6 +60,9 @@ class Course(db.Model, SerializerMixin):
     name = db.Column(db.String)
     description = db.Column(db.String)
     teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    teacher = db.relationship('User', backref=('courses'))
+
 
 
 
