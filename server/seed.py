@@ -52,7 +52,7 @@ def seed_courses(num_courses):
 
     for _ in range(num_courses):
         course = Course(
-            name=fake.word(),
+            name=fake.name(),
             description=fake.text(),
             teacher_id=fake.random_element(teacher_ids)[0]
         )

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import * as ReactDOM from "react-dom/client";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import NavBar from "./components/NavBar";
 import Tasks from "./pages/Tasks";
 import Messages from "./pages/Messages";
 import Help from "./pages/Help";
@@ -15,7 +16,7 @@ function App() {
         <NavBar />
       </nav>
       <Routes>
-        <Route path="/" element={<Courses />} />
+        <Route exact path="/" element={<Courses />} />
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/tasks" element={<Tasks />} />
         <Route path="/messages" element={<Messages />} />
