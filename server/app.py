@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from flask import Flask, request, make_response
 from flask_migrate import Migrate
-from models import db, User, Course, StudentCourse, Assignment
+from models import *
 import os
 from flask_restful import Api, Resource
 

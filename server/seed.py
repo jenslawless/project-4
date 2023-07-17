@@ -8,7 +8,7 @@ from faker import Faker
 
 # Local imports
 from app import app
-from models import db, User, StudentCourse, Assignment, Course
+from models import *
 
 fake = Faker()
 
@@ -47,40 +47,40 @@ def seed_courses(users):
     
     return course_list
 
-def seed_studentcourse(users, courses):
-    studentcourses = []
-    student_users = [user for user in users if user.role == 'student']
-    
-    for user in student_users:
-        num_courses = randint(2, 5)
-        user_courses = sample(courses, num_courses)
-
-        for course in user_courses:
-            studentcourse = StudentCourse(
-                student_id=user.id,
-                course_id=course.id
-            )
-        
-            studentcourses.append(studentcourse)
-    
-    return studentcourses
-
 def seed_assignments(courses, users):
     assignments = []
     student_users = [user for user in users if user.role == 'student']
 
-    for course in courses: 
-        enrolled_students = [user for user in student_users if course in user.course_list]
-        
-        for _ in range(4, 7):       
+
+    for course in courses:
+        num_assignments = randint(4, 7)
+
+        for _ in range(num_assignments):
             new_assignment = Assignment(
                 description=fake.sentence(),
                 course_id=course.id,
-                grade=rc(range(60, 100))
             )
             assignments.append(new_assignment)
 
     return assignments
+
+
+def seed_grades(assignments):
+    grades = []
+
+    for assignment in assignments:
+        course = assignment.course
+        students = course.students  # Retrieve the enrolled students for the course
+
+        for student in students:
+            grade = Grade(
+                assignment_id=assignment.id,
+                student_id=student.id,
+                value=randint(60, 100)
+            )
+            grades.append(grade)
+
+    return grades
 
 if __name__ == '__main__':
 
@@ -88,8 +88,9 @@ if __name__ == '__main__':
         print("Clearing db...")
         Course.query.delete()
         Assignment.query.delete()
-        StudentCourse.query.delete()
+        Grade.query.delete()
         User.query.delete()
+        enrollments.delete()
 
         print("Seeding users...")
         users = seed_users()
@@ -101,14 +102,14 @@ if __name__ == '__main__':
         db.session.add_all(courses)
         db.session.commit()
 
-        print("Seeding student courses...")
-        studentcourses = seed_studentcourse(users, courses)
-        db.session.add_all(studentcourses)
-        db.session.commit()
-
         print("Seeding assignments...")
         assignments = seed_assignments(courses, users)
         db.session.add_all(assignments)
+        db.session.commit()
+
+        print("Seeding grades...")
+        grades = seed_grades(assignments)
+        db.session.add_all(grades)
         db.session.commit()
 
         print("Done seeding!")
