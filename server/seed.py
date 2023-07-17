@@ -32,8 +32,6 @@ def seed_users():
 
     return users
 
-
-
 def seed_courses(users):
     courses = ["Algebra", "Physics", "English", "US History", "Ceramics", "Chemistry", "Art History"]
     course_list = []
@@ -67,23 +65,20 @@ def seed_studentcourse(users, courses):
     
     return studentcourses
 
-def seed_assignments(users):
+def seed_assignments(courses, users):
     assignments = []
     student_users = [user for user in users if user.role == 'student']
 
-    for user in student_users:
-        num_assignments = randint(6, 10)
-        user_courses = [course for course in user.course_list]
-        for _ in range(num_assignments):
-            course = rc(user_courses)
+    for course in courses: 
+        enrolled_students = [user for user in student_users if course in user.course_list]
         
-            assignment = Assignment(
+        for _ in range(4, 7):       
+            new_assignment = Assignment(
                 description=fake.sentence(),
-                student_id=user.id,
                 course_id=course.id,
                 grade=rc(range(60, 100))
             )
-            assignments.append(assignment)
+            assignments.append(new_assignment)
 
     return assignments
 
@@ -112,7 +107,7 @@ if __name__ == '__main__':
         db.session.commit()
 
         print("Seeding assignments...")
-        assignments = seed_assignments(users)
+        assignments = seed_assignments(courses, users)
         db.session.add_all(assignments)
         db.session.commit()
 
