@@ -1,7 +1,12 @@
 import React from "react";
+import CoursesHero from "../components/CoursesHero";
 
 function Courses() {
-  return <div>Courses</div>;
+  return (
+    <>
+      <CoursesHero />
+    </>
+  );
 }
 
 export default Courses;

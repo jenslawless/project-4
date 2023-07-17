@@ -8,6 +8,7 @@ import Help from "./pages/Help";
 import Courses from "./pages/Courses";
 import Calendar from "./pages/Calendar";
 import AccountSettings from "./pages/AccountSettings";
+import ErrorPage from "./pages/ErrorPage";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/messages" element={<Messages />} />
         <Route path="/account/settings" element={<AccountSettings />} />
         <Route path="/help" element={<Help />} />
+        <Route path="/*" element={<ErrorPage />} />
       </Routes>
     </Router>
   );

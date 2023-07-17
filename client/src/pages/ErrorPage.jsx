@@ -1,7 +1,8 @@
 import React from "react";
+import ErrorContent from "../components/ErrorContent";
 
 function ErrorPage() {
-  return <div>404 ERROR: The page you have tried to reach does not exist.</div>;
+  return <ErrorContent />;
 }
 
 export default ErrorPage;
