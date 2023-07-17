@@ -28,16 +28,13 @@ class User(db.Model, SerializerMixin):
     password = db.Column(db.String)
     role = db.Column(db.String)
 
-
+    students_courses = db.relationship('StudentCourse', backref='user')
 
 class StudentCourse(db.Model, SerializerMixin):
     __tablename__ = "students_courses"
 
     student_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), primary_key=True)
-
-
-
 
 class Assignment(db.Model, SerializerMixin):
     __tablename__ = "assignments"
@@ -62,6 +59,7 @@ class Course(db.Model, SerializerMixin):
     teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     teacher = db.relationship('User', backref=('courses'))
+    students_courses = db.relationship('StudentCourse', backref='course')
 
 
 
