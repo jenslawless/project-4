@@ -30,6 +30,8 @@ class User(db.Model, SerializerMixin):
 
     course_list = db.relationship('Course', secondary='enrollments', backref='students')
 
+    serialize_rules = ("-course_list", "-courses.students", "-courses.assignments.students")
+
     @validates('email')
     def validate_email(self, key, email):
         if '@' not in email:
@@ -37,14 +39,6 @@ class User(db.Model, SerializerMixin):
         if len(email) > 40:
                 raise ValueError("Invalid email address. Email must be a maximum of 40 characters long.")
         return email
-
-# class StudentCourse(db.Model, SerializerMixin):
-#     __tablename__ = "students_courses"
-
-#     student_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-#     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), primary_key=True)
-
-#     # assignments = db.relationship('Assignment', secondary='students_courses', backref='student_courses')
 
 class Assignment(db.Model, SerializerMixin):
     __tablename__ = "assignments"
@@ -54,6 +48,8 @@ class Assignment(db.Model, SerializerMixin):
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
 
     grades = db.relationship('Grade', backref='assignment')
+
+    serialize_rules = ("-course.students",)
 
 class Course(db.Model, SerializerMixin):
     __tablename__ = "courses"
