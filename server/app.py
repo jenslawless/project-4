@@ -36,7 +36,32 @@ class Courses(Resource):
         
         return make_response(courses_dict, 200)
 
+
+class Students(Resource):
+    def get(self):
+        students = User.query.filter(User.role == 'student').all()
+        students_serialized = []
+        for stu in students:
+            students_serialized.append(stu.to_dict())
+        
+        return make_response(students_serialized, 200)
+
+class Assignments(Resource):
+
+    def get(self):
+        assignments = Assignment.query.all()
+        assignments_serialized = []
+        for ass in assignments:
+            assignments_serialized.append(ass.to_dict())
+        return make_response(assignments_serialized, 200)
+
+
+
 api.add_resource(Courses, '/courses')
+api.add_resource(Students, '/students')
+api.add_resource(Assignments, '/assignments')
+
+
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)

@@ -30,7 +30,7 @@ class User(db.Model, SerializerMixin):
 
     course_list = db.relationship('Course', secondary='enrollments', backref='students')
 
-    serialize_rules = ("-course_list", "-courses.students", "-courses.assignments.students")
+    serialize_rules = ("-courses.students",)
 
     @validates('email')
     def validate_email(self, key, email):
@@ -49,7 +49,6 @@ class Assignment(db.Model, SerializerMixin):
 
     grades = db.relationship('Grade', backref='assignment')
 
-    serialize_rules = ("-course.students",)
 
 class Course(db.Model, SerializerMixin):
     __tablename__ = "courses"
@@ -61,6 +60,8 @@ class Course(db.Model, SerializerMixin):
 
     teacher = db.relationship('User', backref='courses')
     assignments = db.relationship('Assignment', backref='course')
+
+    serialize_rules = ("-students.course_list", "-teacher.courses", "-assignments.course",)
 
 class Grade(db.Model, SerializerMixin):
     __tablename__ = "grades"
