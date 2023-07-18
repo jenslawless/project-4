@@ -5,7 +5,7 @@ function NavBar() {
     <div class="flex flex-col fixed left-0 items-center w-20 pt-8 h-screen  text-gray-700 bg-zinc-600 m-0">
       <a
         class="flex items-center justify-center w-12 h-12 m-2 bg-neutral-300 hover:bg-white"
-        href="/account/settings/"
+        href=""
       >
         <svg
           class="w-10 h-10 stroke-current"
